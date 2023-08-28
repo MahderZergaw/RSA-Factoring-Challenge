@@ -1,30 +1,42 @@
-#!/bin/bash
+import sys
 
-# Check if the correct number of arguments is provided
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <file>"
-    exit 1
-fi
+def factorize(n):
+    factors = []
+    for i in range(2, n // 2 + 1):
+        if n % i == 0:
+            factors.append((i, n // i))
+    return factors
 
-input_file="$1"
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: factors <file>")
+        return
 
-# Function to factorize a number and output its factorization
-factorize() {
-    local num="$1"
-    for (( i=2; i<=num/2; i++ )); do
-        if (( num % i == 0 )); then
-            echo "$num=$i*$(($num / i))"
-            return
-        fi
-    done
-    echo "$num is prime"
-}
+    input_file = sys.argv[1]
 
-# Read the input file line by line
-while IFS= read -r line; do
-    if [[ $line =~ ^[0-9]+$ ]]; then
-        factorize "$line"
-    else
-        echo "Invalid input: $line"
-    fi
-done < "$input_file"
+    try:
+        with open(input_file, 'r') as f:
+            numbers = f.read().splitlines()
+    except FileNotFoundError:
+        print("File not found:", input_file)
+        return
+
+    for number in numbers:
+        try:
+            n = int(number)
+            if n <= 1:
+                print(f"Invalid number: {n}")
+                continue
+        except ValueError:
+            print(f"Invalid number format: {number}")
+            continue
+
+        factorizations = factorize(n)
+        if factorizations:
+            for p, q in factorizations:
+                print(f"{n}={p}*{q}")
+        else:
+            print(f"No factorization found for {n}")
+
+if __name__ == "__main__":
+    main()
