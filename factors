@@ -1,42 +1,48 @@
-import sys
+#!/usr/bin/env bash
+#is a challenge
+check_factor()
+{
+	if [ $# -ne 3 ];
+        then
+                args=("$@")
+                count=0
+                num2=1
+                for a in ${args[*]};
+                do
+                        if [ $count -gt 1 ];
+                        then
+                                num2=$(echo $a*$num2 | bc)
+                        fi
+                        count=$((count + 1))
+                done
+        else
+                num2=$3
+        fi
 
-def factorize(n):
-    factors = []
-    for i in range(2, n // 2 + 1):
-        if n % i == 0:
-            factors.append((i, n // i))
-    return factors
+        num1=$2
+        num=$(echo "$1" | tr ':' '=')
 
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: factors <file>")
-        return
+        result=$(echo "if($num2 > $num1) 1 else 0" | bc)
+	        if ((result == 1)); then
+		        numcp=$num1
+		        num1=$num2
+		        num2=$numcp
+                fi
 
-    input_file = sys.argv[1]
+        echo "$num$num1*$num2"
+}
 
-    try:
-        with open(input_file, 'r') as f:
-            numbers = f.read().splitlines()
-    except FileNotFoundError:
-        print("File not found:", input_file)
-        return
+if [ $# -ne 1 ]
+then
+        echo 'Usage: rsa <file>'
+        exit 1
+else
 
-    for number in numbers:
-        try:
-            n = int(number)
-            if n <= 1:
-                print(f"Invalid number: {n}")
-                continue
-        except ValueError:
-            print(f"Invalid number format: {number}")
-            continue
+        while read i
+        do
 
-        factorizations = factorize(n)
-        if factorizations:
-            for p, q in factorizations:
-                print(f"{n}={p}*{q}")
-        else:
-            print(f"No factorization found for {n}")
+                result=$(factor "$i")
+                check_factor $result
 
-if __name__ == "__main__":
-    main()
+        done < "$1"
+fi
